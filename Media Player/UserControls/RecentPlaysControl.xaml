@@ -1,0 +1,65 @@
+﻿<UserControl x:Class="Media_Player.UserControls.RecentPlaysControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Media_Player.UserControls"
+             mc:Ignorable="d"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
+             xmlns:local1="clr-namespace:Media_Player"
+             d:DesignHeight="650" d:DesignWidth="500">
+    <UserControl.Resources>
+        <local1:TimeConverter x:Key="TimeConverter"/>
+    </UserControl.Resources>
+    <materialDesign:TransitioningContent x:Name="TransitioningContentSlide" OpeningEffect="{materialDesign:TransitionEffect SlideInFromBottom, Duration=0:0:0.5}">
+        <Grid fw:AcrylicWindow.Enabled="True">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="6*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Text="Recent plays" Foreground="White" FontWeight="Bold" VerticalAlignment="Center" Margin="40,0,0,0" FontSize="25"/>
+            <Grid Grid.Row="1" Name="PlaylistInfo">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="1.5*" />
+                </Grid.ColumnDefinitions>
+                <Image Name="PlaylistThumnail" Source="../Images/image_playlist.png" Grid.Column="0" Width="180"/>
+                <StackPanel Grid.Column="1" Orientation="Vertical">
+                    <TextBlock Name="tbPlaylistName" Text="Playlist Name" Foreground="White" FontFamily="SVNtimes new roman" FontSize="36" Margin="20,30,-0.4,0"/>
+                    <TextBlock Name="tbNumberSong" Text="{Binding}" Foreground="White" FontFamily="SVNtimes new roman" FontSize="20" Margin="20,0,0,0"/>
+                    <StackPanel Orientation="Horizontal" Margin="20,30,0,0">
+                        <Button Click="ContinuePlay" Width="144" Height="30" Padding="0" Margin="0,0,20,0" Background="{x:Null}" BorderBrush="{x:Null}" >
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Play" VerticalAlignment="Center" Foreground="White" Width="20" Height="20"/>
+                                <TextBlock Text="Continue playing" VerticalAlignment="Center" FontSize="15" Foreground="White"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+            <DockPanel Grid.Row="2">
+                <ListView Margin="0,10,0,0" DockPanel.Dock="Top" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Name="lvListSong" Grid.Row="1" Foreground="WhiteSmoke" SelectionMode="Multiple">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="Focusable" Value="false"/>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <DockPanel  Margin="20,0,20,0" Width="440">
+                                <TextBlock Text="{Binding Name}" Foreground="White" Width="180" TextTrimming="CharacterEllipsis" FontSize="15"
+                                           Margin="10,0,0,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Singer}" Foreground="White" Width="180" TextTrimming="CharacterEllipsis" FontSize="15"
+                                           Margin="10,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                <TextBlock DockPanel.Dock="Right" Text="{Binding Duration, Converter={StaticResource TimeConverter}}" Foreground="White" 
+                                           FontSize="15" Width="50" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            </DockPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </DockPanel>
+        </Grid>
+    </materialDesign:TransitioningContent>
+</UserControl>

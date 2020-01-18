@@ -1,0 +1,88 @@
+﻿<UserControl x:Class="Media_Player.UserControls.CustomPlaylistControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Media_Player"
+             mc:Ignorable="d" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
+             d:DesignHeight="650" d:DesignWidth="500">
+    <UserControl.Resources>
+        <local:TimeConverter x:Key="TimeConverter"/>
+    </UserControl.Resources>
+    <materialDesign:TransitioningContent x:Name="TransitioningContentSlide" OpeningEffect="{materialDesign:TransitionEffect SlideInFromBottom, Duration=0:0:0.5}">
+        <Grid fw:AcrylicWindow.Enabled="True">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="2*"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="1.5*" />
+                </Grid.ColumnDefinitions>
+                <Image Name="PlaylistThumnail" Source="../Images/image_playlist.png" Grid.Column="0" Width="180"/>
+                <StackPanel Grid.Column="1" Orientation="Vertical">
+                    <TextBlock Name="tbPlaylistName" Text="Playlist Name" Foreground="White" FontFamily="SVNtimes new roman" FontSize="36" Margin="20,30,-0.4,0"/>
+                    <TextBlock Name="tbNumberSong" Text="" Foreground="White" FontFamily="SVNtimes new roman" FontSize="20" Margin="20,0,0,0"/>
+                    <StackPanel Orientation="Horizontal" Margin="20,40,0,0">
+                        <Button Click="PlayAll" Width="70" Height="30" Padding="0" Margin="0,0,20,0" Background="{x:Null}" BorderBrush="{x:Null}" >
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Play" VerticalAlignment="Center" Foreground="White" Width="20" Height="20"/>
+                                <TextBlock Text="Play all" VerticalAlignment="Center" FontSize="15" Foreground="White"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Click="AddSong" Width="68" Height="30" Padding="0" Margin="0,0,20,0" Background="{x:Null}" BorderBrush="{x:Null}" >
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Plus" VerticalAlignment="Center" Foreground="White" Width="20" Height="20"/>
+                                <TextBlock Text="Add to" VerticalAlignment="Center" FontSize="15" Foreground="White"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Click="SavePlaylist" Width="76" Height="30" Padding="0" Margin="0" Background="{x:Null}" BorderBrush="{x:Null}" >
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="ContentSave" VerticalAlignment="Center" Foreground="White" Width="20" Height="20"/>
+                                <TextBlock Text="Save" VerticalAlignment="Center" FontSize="15" Foreground="White"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+            <DockPanel Grid.Row="1">
+                <ListView DockPanel.Dock="Top" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Name="lvListSong" Grid.Row="1" Foreground="WhiteSmoke" SelectionMode="Multiple">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <DockPanel  Margin="20,0,20,0" Width="440">
+                                <CheckBox Name="CheckboxSong" Click="CheckboxSong_Click" IsChecked="{Binding Path=IsSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}}"
+                                          BorderBrush="White" VerticalAlignment="Center" Width="30" Height="30" HorizontalAlignment="Left" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="0,2,0,0" Background="White" Foreground="{x:Null}" />
+                                <TextBlock Text="{Binding Name}" Foreground="White" Width="150" TextTrimming="CharacterEllipsis" FontSize="15"
+                                           Margin="10,0,0,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Singer}" Foreground="White" Width="150" TextTrimming="CharacterEllipsis" FontSize="15"
+                                           Margin="10,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                <TextBlock DockPanel.Dock="Right" Text="{Binding Duration, Converter={StaticResource TimeConverter}}" Foreground="White" 
+                                           FontSize="15" Width="50" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            </DockPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+                <DockPanel Name="FunctionPanel" DockPanel.Dock="Bottom" Height="50" VerticalAlignment="Bottom" Margin="300,0,0,0" Visibility="Collapsed">
+                    <Button Name="DelFromPlaylist" Click="DelFromPlaylist_Click" Height="Auto" Width="89" Padding="0,0,0,0" Margin="0,10,0,3.6" HorizontalAlignment="Right" BorderBrush="{x:Null}" Background="{x:Null}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="TrashCan" VerticalAlignment="Center" Width="30" Height="30" Foreground="White"/>
+                            <StackPanel Orientation="Vertical" Width="54">
+                                <TextBlock Text="Delete from" Width="76" FontSize="10" Foreground="White"/>
+                                <TextBlock Text="playlist" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="White"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Button>
+                    <Button Name="SelectAllSong" Click="SelectAllSong_Click" Height="Auto" Width="95" Padding="0,0,0,0" Margin="0,10,0,3.6" HorizontalAlignment="Right" Background="{x:Null}" BorderBrush="{x:Null}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="SelectAll" VerticalAlignment="Center" Width="30" Height="30" Foreground="White"/>
+                            <TextBlock Text="Select all" VerticalAlignment="Center" Foreground="White"/>
+                        </StackPanel>
+                    </Button>
+                </DockPanel>
+            </DockPanel>
+        </Grid>
+    </materialDesign:TransitioningContent>
+</UserControl>
