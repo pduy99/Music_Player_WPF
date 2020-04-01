@@ -12,6 +12,9 @@ using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using System.Windows.Forms;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Media_Player
 {
@@ -63,6 +66,13 @@ namespace Media_Player
         BindingList<Playlist> customplaylist = new BindingList<Playlist>();
 
         /// <summary>
+        /// Chứa danh sách các bài hát crawl từ zingmp3
+        /// </summary>
+        Playlist ZingMp3Playlist = new Playlist();
+
+        Playlist selectedPlaylist = new Playlist();
+
+        /// <summary>
         /// Biến đếm số lần đã chơi của playlist
         /// </summary>
         int playcount = 1;
@@ -87,22 +97,23 @@ namespace Media_Player
         public MainWindow()
         {
             InitializeComponent();
-            
             //UI
             tbSongName.DataContext = SuperSong;
             tbArtist.DataContext = SuperSong;
 
             //Timer
             media.MediaEnded += Media_MediaEnded;
-            _timer = new DispatcherTimer();
-            _timer.Interval = TimeSpan.FromSeconds(1);
+            _timer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(1)
+            };
             _timer.Tick += _timer_Tick;
 
             //Slider
-            TimeSlider.AddHandler(MouseLeftButtonUpEvent, new MouseButtonEventHandler(timeSlider_MouseLeftButtonUp), true);
+            TimeSlider.AddHandler(MouseLeftButtonUpEvent, new MouseButtonEventHandler(TimeSlider_MouseLeftButtonUp), true);
             TimeSlider.ValueChanged += TimeSlider_ValueChanged;
             VolumeSlider.ValueChanged += VolumeSlider_ValueChanged;
-            VolumeSlider.AddHandler(MouseLeftButtonUpEvent, new MouseButtonEventHandler(volumnSlider_MouseLeftButtonUp), true);
+            VolumeSlider.AddHandler(MouseLeftButtonUpEvent, new MouseButtonEventHandler(VolumnSlider_MouseLeftButtonUp), true);
 
             //Playlist
             lvNowPlaying.ItemsSource = playlist;
@@ -115,6 +126,8 @@ namespace Media_Player
             //Hook
             _hook = Hook.GlobalEvents();
             _hook.KeyUp += _hook_KeyUp;
+
+            
         }
 
         /// <summary>
@@ -149,7 +162,6 @@ namespace Media_Player
             Directory.CreateDirectory(DataPath);
             LoadPlaylist();
             LoadRecentPlays();
-
         }
 
         private void Window_Closing(object sender, CancelEventArgs e)
@@ -157,12 +169,14 @@ namespace Media_Player
             _hook.KeyUp -= _hook_KeyUp;
             _hook.Dispose();
             SaveReccentPlays();
+
+            Environment.Exit(0);
         }
 
         /*
          * Các hàm xử lý âm thanh
          */
-        private void volumnSlider_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private void VolumnSlider_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             var volumn = sender as Slider;
             media.Volume = volumn.Value;
@@ -210,7 +224,7 @@ namespace Media_Player
             }
         }
 
-        private void timeSlider_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private void TimeSlider_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (media.Source != null)
             {
@@ -515,6 +529,7 @@ namespace Media_Player
         /// <param name="e"></param>
         private void BtnPlayRandomMode_Click(object sender, RoutedEventArgs e)
         {
+           
             if (isPlayingRandomly == false)
             {
                 iconShuffel.Foreground = Brushes.LightGreen;
@@ -534,9 +549,11 @@ namespace Media_Player
         /// <param name="e"></param>
         private void OpenFile_Click(object sender, MouseButtonEventArgs e)
         {
-            var screen = new Microsoft.Win32.OpenFileDialog();
-            screen.Filter = audioExtension;
-            screen.Multiselect = true;
+            var screen = new Microsoft.Win32.OpenFileDialog
+            {
+                Filter = audioExtension,
+                Multiselect = true
+            };
             if (screen.ShowDialog() == true)
             {
                 foreach(var filename in screen.FileNames)
@@ -557,7 +574,7 @@ namespace Media_Player
                 {
                     media.Open(new Uri(playlist[0].Path, UriKind.Absolute));
                     currentSong = playlist[0];
-                    SuperSong.update(currentSong);
+                    SuperSong.Update(currentSong);
                     UpdateThumbnail();
                     media.MediaOpened += CurrentSong_MediaOpened;
                 }
@@ -570,11 +587,18 @@ namespace Media_Player
         /// <param name="song"></param>
         private void PlaySelectedSong(Song song)
         {
-            media.Open(new Uri(song.Path, UriKind.Absolute));
-            currentSong = song;
-            media.MediaOpened += CurrentSong_MediaOpened;
-            SuperSong.update(currentSong);
-            UpdateThumbnail();
+            try
+            {
+                media.Open(new Uri(song.Path, UriKind.Absolute));
+                currentSong = song;
+                media.MediaOpened += CurrentSong_MediaOpened;
+                SuperSong.Update(currentSong);
+                UpdateThumbnail();
+            }
+            catch (Exception e)
+            {
+                Debug.Write("Loi phat bai hat: " + e.Message);
+            }
         }
 
         /*
@@ -696,9 +720,8 @@ namespace Media_Player
         private void BtnDelCustomPlaylist_Click(object sender, RoutedEventArgs e)
         {
             System.Windows.Controls.Button cmd = (System.Windows.Controls.Button)sender;
-            if(cmd.DataContext is Playlist)
+            if (cmd.DataContext is Playlist playlist)
             {
-                Playlist playlist = (Playlist)cmd.DataContext;
                 customplaylist.Remove(playlist);
                 DeletePlaylist(playlist);
             }
@@ -718,6 +741,7 @@ namespace Media_Player
             if(index >= 0)
             {
                 Playlist p = customplaylist[index];
+                selectedPlaylist = p;
                 var CustomPlaylistController = new CustomPlaylistControl(ref p);
                 MainGrid.Children.Add(CustomPlaylistController);
                 CustomPlaylistController.PlayAllClick += CustomPlaylistController_PlayAllClick;
@@ -743,8 +767,8 @@ namespace Media_Player
         /// <param name="e"></param>
         private void CustomPlaylistController_PlayAllClick(object sender, RoutedEventArgs e)
         {
-            playlist = customplaylist[lvCustomPlaylist.SelectedIndex].Songs;
-            recentplays = customplaylist[lvCustomPlaylist.SelectedIndex];
+            playlist = selectedPlaylist.Songs;
+            recentplays = selectedPlaylist;
             lvNowPlaying.ItemsSource = playlist;
             PlaySelectedSong(playlist[0]);
             playcount = 1;
@@ -905,6 +929,44 @@ namespace Media_Player
             if (!playlist.Contains(song))
             {
                 playlist.Add(song);
+            }
+        }
+
+        private void CrawlZingMp3(object sender, RoutedEventArgs e)
+        {
+            CrawlZingMp3 crawler = new CrawlZingMp3();
+            if(ZingMp3Playlist.Songs == null)
+            {
+                Thread thread = new Thread(() =>
+                {
+                    ZingMp3Playlist = crawler.createAlbum();
+                    
+                    Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() =>
+                    {
+                        MainGrid.Children.Clear();
+                        var CustomPlaylistController = new CustomPlaylistControl(ref ZingMp3Playlist);
+                        selectedPlaylist = ZingMp3Playlist;
+                        MainGrid.Children.Add(CustomPlaylistController);
+                        CustomPlaylistController.PlayAllClick += CustomPlaylistController_PlayAllClick;
+                        CustomPlaylistController.SavePlaylistClick += CustomPlaylistController_SavePlaylistClick;
+                        BusyBar.IsBusy = false;
+                        
+                    }));  
+                });
+                thread.IsBackground = true;
+                thread.Start();
+                BusyBar.IsBusy = true;
+            }
+            else
+            {
+                MainGrid.Children.Clear();
+                var CustomPlaylistController = new CustomPlaylistControl(ref ZingMp3Playlist);
+                selectedPlaylist = ZingMp3Playlist;
+                MainGrid.Children.Add(CustomPlaylistController);
+                CustomPlaylistController.PlayAllClick += CustomPlaylistController_PlayAllClick;
+                CustomPlaylistController.SavePlaylistClick += CustomPlaylistController_SavePlaylistClick;
+                BusyBar.IsBusy = false;
+                
             }
         }
     }

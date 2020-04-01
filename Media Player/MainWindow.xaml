@@ -4,12 +4,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Media_Player.UserControls"
+        xmlns:wpfx="http://schemas.microsoft.com/winfx/2006/xaml/presentation/toolkit/extended"
         mc:Ignorable="d"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
         xmlns:local1="clr-namespace:Media_Player"
         fw:AcrylicWindow.Enabled="True" 
-        FontSize="15" Height="650" Width="750" WindowStyle="None" AllowsTransparency="True" ResizeMode="NoResize" WindowStartupLocation="CenterScreen"
+        FontSize="15" Height="750" Width="800" WindowStyle="None" AllowsTransparency="True" ResizeMode="CanMinimize"  WindowStartupLocation="CenterScreen"
         Loaded="Window_Loaded" Closing="Window_Closing">
     <Window.Resources>
         <BitmapImage x:Key="Disc" UriSource="Images/icon_disc1.png"/>
@@ -57,9 +58,7 @@
             <BeginStoryboard Storyboard="{StaticResource PlaylistTabClose}"/>
         </EventTrigger>
     </Window.Triggers>
-
     <DockPanel LastChildFill="True">
-        
         <Grid DockPanel.Dock="Bottom" Height="70" Margin="0,0,0,0" Panel.ZIndex="1">
             <Grid.Background>
                 <SolidColorBrush Color="#66B2FF" Opacity="0.4"/>
@@ -78,7 +77,7 @@
                 <Button Name="btnSkipNext" Click="BtnSkipNext_Click" Width="40" Padding="0,4" Height="40" Background="{x:Null}" BorderBrush="{x:Null}" Margin="0,0,5,0" ToolTip="Next song">
                     <materialDesign:PackIcon Kind="SkipNext" VerticalAlignment="Center" Foreground="White" Width="40" Height="40"/>
                 </Button>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="5,0,5,0">
                     <TextBlock Name="tbCurrentPos" Text="0:00" Margin="0,0,5,0" Foreground="White" FontSize="18"/>
                     <Slider Name="TimeSlider" Orientation="Horizontal" Maximum="1" Minimum="0" Width="200" Foreground="White" VerticalAlignment="Center" IsMoveToPointEnabled="True"/>
                     <TextBlock Name="tbDuration" Text="00:00" Margin="5,0,10,0" Foreground="White" FontSize="18"/>
@@ -159,9 +158,9 @@
             </Grid.Background>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="5.5*"/>
+                <RowDefinition Height="6*"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="6.5*"/>
+                <RowDefinition Height="6*"/>
             </Grid.RowDefinitions>
             <DockPanel Grid.Row="0" LastChildFill="False" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                 <Button x:Name="btnOpenMenu" Visibility="Collapsed" Click="BtnOpenMenu_Click" Foreground="Black" Background="{x:Null}" BorderBrush="{x:Null}">
@@ -201,6 +200,12 @@
                             <TextBlock Text="Recent plays" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White"/>
                         </StackPanel>
                     </ListViewItem>
+                    <ListViewItem PreviewMouseDown="CrawlZingMp3" >
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="GetApp" Foreground="#DDFFFFFF" Margin="15,5,15,0" Width="20" Height="20"/>
+                            <TextBlock Text="Chart ZingMp3" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White"/>
+                        </StackPanel>
+                    </ListViewItem>
                 </ListView>
             </StackPanel>
             <StackPanel Name="CustomPlaylistTitle" Grid.Row="2" Orientation="Horizontal" Height="44" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
@@ -229,6 +234,20 @@
         <!--Bottom Grid-->
         <!--Body-->
         <Grid Name="MainGrid">
+            <!--Busy Indicator-->
+            <wpfx:BusyIndicator IsBusy="False" Panel.ZIndex="100" Name="BusyBar" Background="Transparent">
+                <wpfx:BusyIndicator.BusyContentTemplate>
+                    <DataTemplate>
+                        <StackPanel Margin="4" Background="Transparent">
+                            <TextBlock Text="Downloading Songs" FontWeight="Bold" HorizontalAlignment="Center" Foreground="Black" Margin="0,0,0,5"/>
+                            <StackPanel Margin="0">
+                                <TextBlock Text="This might take up to a minute..." Foreground="Black"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </DataTemplate>
+                </wpfx:BusyIndicator.BusyContentTemplate>
+            </wpfx:BusyIndicator>
+            <!--End Busy Indicator-->
             <Grid Name="NowPlayingGrid" fw:PointerTracker.Enabled="True">
                 <Grid.Background>
                     <SolidColorBrush Color="#606060" Opacity="0.4"/>
@@ -239,7 +258,7 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <TextBlock Text="NOW PLAYING" Foreground="White" FontWeight="Bold" VerticalAlignment="Center" Margin="40,0,0,0" FontSize="25"/>
+                <TextBlock Text="NOW PLAYING" Foreground="White" FontWeight="Bold" VerticalAlignment="Center" Margin="60,0,0,0" FontSize="25"/>
                 <Border x:Name="BorderImageDisc" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1"
                         MaxWidth="420" BorderBrush="#808080" BorderThickness="2" Margin="20">
                     <Ellipse x:Name="ImageDisc" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
@@ -252,15 +271,16 @@
                         </Ellipse.Fill>
                     </Ellipse>
                 </Border>
-                <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="40,-10,0,0">
-                    <materialDesign:PackIcon Kind="Wireless" Foreground="White" Width="30" Height="30" Margin="0,0,5,0"/>
-                    <TextBlock Name ="tbSongName" Text="{Binding Name}" Foreground="White" FontWeight="SemiBold" FontSize="20" VerticalAlignment="Top" />
+                <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="60,-10,0,0">
+                    <materialDesign:PackIcon Kind="Wireless" Foreground="White" Width="45" Height="45" Margin="0,0,5,0"/>
+                    <TextBlock Name ="tbSongName" Text="{Binding Name}" Foreground="White" FontWeight="SemiBold" FontSize="25" VerticalAlignment="Top" Margin="0,5,0,0" />
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="40,-20,0,0"  Grid.Row="3">
+                <StackPanel Orientation="Horizontal" Margin="110,-20,0,0"  Grid.Row="3">
                     <TextBlock Name="tbArtist" Text="{Binding Singer}" Foreground="White" FontWeight="Normal" FontSize="15" VerticalAlignment="Top"/>
                 </StackPanel>
             </Grid>
         </Grid>
         <!--End Body-->
     </DockPanel>
+    
 </Window>

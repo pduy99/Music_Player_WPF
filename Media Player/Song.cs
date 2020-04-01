@@ -90,15 +90,14 @@ namespace Media_Player
                 this.Singer = tag.Artists;
                 this.Thumbnail = LoadImage(tag.Pictures[0].PictureData);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 if(this.Name == "Unknown")
                 {
-                    getNameFromPath();
+                    GetNameFromPath();
                 }
             }
         }
-
 
         public Song()
         {
@@ -108,7 +107,14 @@ namespace Media_Player
             this.album = "";
         }
 
-        public void update(Song song)
+        public Song(string name, string singer, string path)
+        {
+            this.name = name;
+            this.singer = singer;
+            this.path = path;
+        }
+
+        public void Update(Song song)
         {
             this.Name = song.Name;
             this.Singer = song.Singer;
@@ -142,7 +148,7 @@ namespace Media_Player
             return image;
         }
 
-        private void getNameFromPath()
+        private void GetNameFromPath()
         {
             var tokens = this.path.Split(new string[] { "\\" },
                 StringSplitOptions.None);

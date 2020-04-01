@@ -47,7 +47,6 @@ namespace Media_Player
             }
         }
 
-     
         public void AddSongs(Song song)
         {
             Songs.Add(song);
@@ -93,8 +92,5 @@ namespace Media_Player
         {
             this.CollectionChanged?.Invoke(this, e);
         }
-
-     
-
     }
 }
